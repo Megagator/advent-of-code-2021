@@ -4,7 +4,7 @@ use std::io::BufReader;
 
 fn main() {
     let file_name = "./input.txt";
-    let mut last_depth = 0;
+    let mut last_depths: [i32; 4] = [-1,-1,-1,-1];
     let mut total_increases = 0;
 
     // open target file
@@ -29,11 +29,15 @@ fn main() {
                     .expect(
                         format!("failed to read \"{}\" as a depth", line).as_str()
                     );
+
+                last_depths[0] = last_depths[1];
+                last_depths[1] = last_depths[2];
+                last_depths[2] = last_depths[3];
+                last_depths[3] = depth;
                 
-                if depth > last_depth {
+                if last_depths[0] >= 0 && last_depths[0] < last_depths[3] {
                     total_increases += 1;
                 }
-                last_depth = depth;
 
                 // do not accumulate data
                 line.clear();
