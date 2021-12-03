@@ -6,6 +6,7 @@ fn main() {
     let file_name = "./input.txt";
     let mut horizontal = 0;
     let mut depth = 0;
+    let mut aim = 0;
 
     // open target file
     let file = File::open(&file_name)
@@ -29,9 +30,18 @@ fn main() {
                     .expect(format!("unknown digit {}", mag_char).as_str());
                     
                 match dir {
-                    'f' => horizontal += mag,
-                    'd' => depth += mag,
-                    'u' => depth -= mag,
+                    'f' => {
+                        horizontal += mag;
+                        depth += aim * mag;
+                    }
+                    'd' => {
+                        // depth += mag;
+                        aim += mag;
+                    }
+                    'u' => {
+                        // depth -= mag;
+                        aim -= mag;
+                    }
                     _ => ()
                 }
 
@@ -44,5 +54,5 @@ fn main() {
         };
     }
 
-    println!("depth {} x horizontal {} = {}", depth, horizontal, depth * horizontal);
+    println!("aim = {}, depth {} x horizontal {} = {}", aim, depth, horizontal, depth * horizontal);
 }
