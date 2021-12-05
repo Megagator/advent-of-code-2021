@@ -45,7 +45,7 @@ fn main() {
                 if winning_board(board) {
                     print_board(board);
                     print_board_score(n, board);
-                    return
+                    // return
                 }
             }
         }
@@ -75,6 +75,10 @@ fn make_board(mut reader: impl BufRead) -> Vec<Vec<(usize, bool)>> {
 }
 
 fn apply_new_draw(num: usize, board: &mut Vec<Vec<(usize, bool)>>) -> bool {
+    if winning_board(board) {
+        return false
+    }
+
     for row in 0..board.len() {
         for col in 0..board[row].len() {
             if board[row][col].0 == num {
@@ -99,11 +103,11 @@ fn winning_board(board: & Vec<Vec<(usize, bool)>>) -> bool {
             }
         }
     }
-    
+
     // by column
     for col in 0..board.len() {
         for row in 0..board[col].len() {
-            if !board[col][row].1 {
+            if !board[row][col].1 {
                 break;
             }
             if row == board[0].len() - 1 {
@@ -118,10 +122,11 @@ fn winning_board(board: & Vec<Vec<(usize, bool)>>) -> bool {
 fn print_board(board: & Vec<Vec<(usize, bool)>>) {
     for row in 0..board.len() {
         for col in 0..board[row].len() {
+            let num = format!("{: >2}", board[row][col].0);
             if board[row][col].1 {
-                print!("{} ", board[row][col].0.to_string().cyan())
+                print!("{} ", num.cyan())
             } else {
-                print!("{} ", board[row][col].0)
+                print!("{} ", num)
             }
         }
         println!();
@@ -138,5 +143,5 @@ fn print_board_score(winning_num: usize, board: & Vec<Vec<(usize, bool)>>) {
         }
     }
 
-    println!("winning board score is {}", score * winning_num)
+    println!("winning board score is {} with {}", score * winning_num, winning_num)
 }
