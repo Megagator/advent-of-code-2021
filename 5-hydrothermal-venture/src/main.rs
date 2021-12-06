@@ -1,7 +1,6 @@
 use std::io::BufRead;
 use std::io::BufReader;
 use std::fs::File;
-use std::cmp;
 use std::collections::HashMap;
 use colored::*;
 
@@ -40,9 +39,9 @@ fn main() {
 
     for vent in vent_lines.iter() {
         // only consider horizontal or vertical vent lines
-        if vent[0] != vent[2] && vent[1] != vent[3] {
-            continue;
-        }
+        // if vent[0] != vent[2] && vent[1] != vent[3] {
+        //     continue;
+        // }
         // println!("{}, {}, {}, {}", vent[0], vent[1], vent[2], vent[3]);
         log_vent_line(&mut field, vent[0], vent[1], vent[2], vent[3]);
     }
@@ -51,13 +50,9 @@ fn main() {
 }
 
 fn log_vent_line(field: &mut HashMap<(usize, usize), usize>, x1: usize, y1: usize, x2: usize, y2: usize) {
-    let lo_x = cmp::min(x1, x2);
-    let hi_x = cmp::max(x1, x2);
-    let lo_y = cmp::min(y1, y2);
-    let hi_y = cmp::max(y1, y2);
+    let mut x = x1;
+    let mut y = y1;
 
-    let mut x = lo_x;
-    let mut y = lo_y;
     loop {
         let key = (x,y);
         let mut value = 0;
@@ -66,15 +61,16 @@ fn log_vent_line(field: &mut HashMap<(usize, usize), usize>, x1: usize, y1: usiz
         }
         field.insert(key, value + 1);
 
-        if x == hi_x && y == hi_y {
+        if x == x2 && y == y2 {
             break;
         }
 
-        if x < hi_x {
-            x += 1;
+        if x != x2 {
+            x = if x > x2 { x - 1 } else { x + 1 };
         }
-        if y < hi_y {
-            y += 1;
+
+        if y != y2 {
+            y = if y > y2 { y - 1 } else { y + 1 };
         }
     }
 }
@@ -87,11 +83,11 @@ fn print_field(field: &HashMap<(usize, usize), usize>) {
                 Some(v) => {
                     if *v > 1 {
                         dangerous_points += 1;
-                        print!("{} ", v.to_string().green())
+                        print!("{}", v.to_string().green())
                     }
-                    else { print!("{} ", v) }
+                    else { print!("{}", v) }
                 },
-                None => print!(". ")
+                None => print!(".")
             }
         }
         println!();
