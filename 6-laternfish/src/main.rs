@@ -13,7 +13,7 @@ fn main() {
     // uses a reader buffer
     let mut reader = BufReader::new(file);
 
-    let mut lantern_fish: Vec<i32> = {
+    let lantern_fish: Vec<usize> = {
         let mut line = String::new();
         reader.read_line(&mut line).unwrap();
         line.trim_end()
@@ -23,33 +23,40 @@ fn main() {
             .collect()
     };
 
-    let upper_bound = if IS_TEST { 18 } else { 80 };
-    println!("Initial state: ");
-    print_fish(&lantern_fish);
+    let mut lantern_fish_buckets: Vec<i64> = vec![0,0,0,0,0,0,0,0,0];
+    for fish in lantern_fish {
+        lantern_fish_buckets[fish] += 1;
+    }
+
+    println!("{:?}", lantern_fish_buckets);
+
+    let upper_bound = if IS_TEST { 18 } else { 256 };
+    print!("Initial state: ");
+    println!("{:?}", lantern_fish_buckets);
     for day in 1..=upper_bound {
-        let mut new_fish: Vec<i32> = vec![];
-        lantern_fish = lantern_fish.iter().map(|fish| {
-            match fish {
-                0 => {
-                    new_fish.push(8);
-                    6
-                },
-                _ => fish - 1
-            }
-        }).collect();
-        lantern_fish.append(&mut new_fish);
+        /*
+            0 -> 6, dupe into 8
+            1 -> 0
+            2 -> 1
+            3 -> 2
+            4 -> 3
+            5 -> 4
+            6 -> 5
+            7 -> 6
+            8 -> 7
+        */
+        let spawned_fish = lantern_fish_buckets[0];
+        for i in 1..lantern_fish_buckets.len() {
+            lantern_fish_buckets[i - 1] = lantern_fish_buckets[i];
+        }
+        lantern_fish_buckets[8] = spawned_fish;
+        lantern_fish_buckets[6] += spawned_fish;
         
         let day_string = format!("{: >2}", day);
         print!("After {} {}", day_string, if day == 1 { "day:  " } else { "days: " });
-        print_fish(&lantern_fish);
+        println!("{:?}", lantern_fish_buckets);
     }
 
-    println!("After {} days there will be {} fish", upper_bound, lantern_fish.len())
-}
-
-fn print_fish(fish: &Vec<i32>) {
-    for fish in fish {
-        print!("{},", fish)
-    }
-    println!();
+    let sum:i64 = lantern_fish_buckets.iter().sum();
+    println!("After {} days there will be {} fish", upper_bound, sum)
 }
