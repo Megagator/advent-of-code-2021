@@ -25,19 +25,21 @@ fn main() {
 
     crab_positions.sort();
 
-    let count = crab_positions.len();
-    let median: i32;
-    if count % 2 == 0 {
-        median = (crab_positions[count / 2 - 1] + crab_positions[count / 2]) / 2;
-    } else {
-        median = crab_positions[(count + 1) / 2 - 1]
-    }
+    let count = crab_positions.len() as f32;
+    let sum: i32 = crab_positions.iter().sum();
+    let mean = (sum as f32 / count).floor() as i32;
+    // println!("sum {} count {} mean {}", sum, count, mean);
 
     let mut fuel_cost = 0;
     for crab in crab_positions.iter() {
-        fuel_cost += (crab - median).abs();
+        let raw_cost = (crab - mean).abs();
+        fuel_cost += triangular(raw_cost);
     }
 
-    println!("{:?}", crab_positions);
-    println!("Cheapest position is {} and costs {} fuel", median, fuel_cost);
+    // println!("{:?}", crab_positions);
+    println!("Cheapest position is {} and costs {} fuel", mean, fuel_cost);
+}
+
+fn triangular(num: i32) -> i32 {
+    (num * num + num) / 2
 }
