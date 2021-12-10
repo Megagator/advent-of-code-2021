@@ -107,20 +107,3 @@ fn unique_map_to_num() -> HashMap<usize, char> {
 // .    f  e    f  .    f  e    f  .    f
 // .    f  e    f  .    f  e    f  .    f
 //  gggg    gggg    ....    gggg    gggg
-
-
-
-
-
-
-
-
-
-
-// Start by taking each segment of a 7-segment display, and assign it a score based on the number of digits in which that segment is used. For instance, segment "a" is worth 8, because it's used in 8 digits (0, 2, 3, 5, 6, 7, 8, 9), segment "b" is 6, since it's used in 6 digits (0, 4, 5, 6, 8, 9), etc
-// Now, take each digit, and add up the scores of all the segments used to create that digit. For example, a "1" uses segment "c", worth 8 points, and segment "f", worth 9 points, for a total of 17. If you do this for every digit, you'll find they yield 10 unique numbers. Armed with these sums, decoding the output is now fairly straightforward:
-// Count the number of times each character occurs in the first part of the row, before the "|". Since all 10 digits are present here exactly once, this is equivalent to the first step described above. This is that character's score.
-// For each digit in the output, add up the scores for each character contained in that digit.
-// Look up the sum in a table of the sums you calculated earlier to find out which digit yields that sum.
-// That's it. You've decoded the digit.
-// I was pretty stoked to figure this out, mostly because the other ways I could think of seemed like the kind of fussy logic that I have to get wrong 4 or 5 times before I get it right.

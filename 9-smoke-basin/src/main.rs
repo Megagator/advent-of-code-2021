@@ -1,5 +1,7 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
+use colored::*;
 
 const IS_TEST: bool = false;
 
@@ -20,7 +22,8 @@ fn main() {
         })
         .collect();
 
-    let mut low_points = Vec::new();
+    let mut low_point_map: HashMap<(usize, usize), HashMap<(usize, usize), bool>> = HashMap::new();
+    let mut low_point_list = Vec::new();
     for i in 0..rows.len() {
         for j in 0..rows[i].len() {
             let mut north_is_higher = false;
@@ -44,11 +47,71 @@ fn main() {
             }
 
             if north_is_higher && south_is_higher && west_is_higher && east_is_higher {
-                low_points.push(rows[i][j]);
+                low_point_map.insert((i,j), HashMap::new());
+                low_point_list.push((i,j));
             }
         }
     }
 
-    let risk = low_points.iter().sum::<u32>() + low_points.len() as u32;
-    println!("Risk level is {}", risk);
+    for (low_point, basin_points) in low_point_map.iter_mut() {
+        add_to_basin(*low_point, &rows, basin_points);
+        // println!("{:?}, {:?}", low_point, basin_points);
+    }
+
+    for i in 0..rows.len() {
+        for j in 0..rows[i].len() {
+            let mut found_point = false;
+            for (_, basin_points) in &low_point_map {
+                if basin_points.get(&(i,j)) != None {
+                    found_point = true;
+                    print!("{}", rows[i][j].to_string().red());
+                    break;
+                }
+            }
+            
+            if !found_point { 
+                print!("{}", rows[i][j])
+            }
+        }
+        println!();
+    }
+    
+    let mut basin_sizes = Vec::new();
+    for (_, basin_points) in &low_point_map {
+        basin_sizes.push(basin_points.len());
+    }
+
+    basin_sizes.sort();
+    let b1 = basin_sizes[basin_sizes.len() - 1];
+    let b2 = basin_sizes[basin_sizes.len() - 2];
+    let b3 = basin_sizes[basin_sizes.len() - 3];
+    println!("Top 3 basin sizes {}, {}, {} multiplied are {}", b1, b2, b3, b1 * b2 * b3);
+}
+
+fn add_to_basin(point: (usize, usize), grid: &Vec<Vec<u32>>, basin_point_map: &mut HashMap<(usize, usize), bool>) {
+    if grid[point.0][point.1] == 9 {
+        return
+    }
+
+    basin_point_map.insert(point, true);
+
+    // check north
+    if point.0 > 0 && basin_point_map.get(&(point.0 - 1, point.1)) == None {
+        add_to_basin((point.0 - 1, point.1), grid, basin_point_map);
+    }
+    
+    // check south
+    if point.0 < grid.len() - 1 && basin_point_map.get(&(point.0 + 1, point.1)) == None {
+        add_to_basin((point.0 + 1, point.1), grid, basin_point_map);
+    }
+    
+    // check west
+    if point.1 > 0 && basin_point_map.get(&(point.0, point.1 - 1)) == None {
+        add_to_basin((point.0, point.1 - 1), grid, basin_point_map);
+    }
+    
+    // check east
+    if point.1 < grid[point.0].len() - 1 && basin_point_map.get(&(point.0, point.1 + 1)) == None {
+        add_to_basin((point.0, point.1 + 1), grid, basin_point_map);
+    }
 }
