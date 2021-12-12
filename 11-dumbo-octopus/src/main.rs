@@ -21,21 +21,25 @@ fn main() {
         })
         .collect();
 
-
-    let mut flash_score = 0;
-    for s in 1..=100 {
+    let mut step = 0;
+    loop {
+        step += 1;
         println!();
-        println!("Step {}", s);
+        println!("Step {}", step);
         increment(&mut rows);
         flash_mob(&mut rows);
 
-        flash_score += get_number_of_flashes(&mut rows);
-
+        let step_score = get_number_of_flashes(&mut rows);
+        
         reset_flash_status(&mut rows);
         print_octo_rows(&rows);
+
+        if step_score == rows.len() * rows[0].len() {
+            break;
+        }
     }
 
-    println!("Total flashes is {}", flash_score);
+    println!("Total flash happens at step {}", step);
 }
 
 fn increment(rows: &mut Vec<Vec<(u8, bool)>>) {
@@ -99,7 +103,7 @@ fn flash(i: usize, j: usize, rows: &mut Vec<Vec<(u8, bool)>>) {
     }
 }
 
-fn get_number_of_flashes(rows: &Vec<Vec<(u8, bool)>>) -> u32 {
+fn get_number_of_flashes(rows: &Vec<Vec<(u8, bool)>>) -> usize {
     let mut flash_count = 0;
 
     for row in rows {
