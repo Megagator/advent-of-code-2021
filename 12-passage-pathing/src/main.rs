@@ -5,7 +5,7 @@ use std::io::{self, BufRead};
 const IS_TEST: bool = false;
 
 fn main() {
-    let file_name = if IS_TEST { "input.test.txt" } else { "input.txt" };
+    let file_name = if IS_TEST { "input.test.3.txt" } else { "input.txt" };
     // open target file
     let file = File::open(&file_name)
         .expect("unable to open file");
@@ -63,21 +63,52 @@ fn explore_path(
     if let Some((cave_key, connected_caves)) = caves.get_key_value(current_cave) {
         if *cave_key == "end" {
             *possible_paths += 1;
-            println!("{:?}", current_path);
+            println!("{}", current_path.join(","));
         } else {
             for cave in connected_caves {
                 let mut new_path = current_path.to_owned();
                 new_path.push(*cave);
                 if cave.to_lowercase() == *cave {
-                    // it is lowercase
-                    if !current_path.contains(cave) {
-                        // has not yet been visited
-                        explore_path(caves, &mut new_path, possible_paths)
+                    // it is a small cave
+                    if *cave == "start" {
+                        // don't visit start twice
+                        continue;
+                    }
+
+                    if has_visited_this_small_cave_before(cave, current_path) {
+                        // see if you can visit it again 
+                        if !two_small_caves_have_been_visited(current_path) {
+                            // try visiting it twice
+                            explore_path(caves, &mut new_path, possible_paths);
+                        }
+                    } else {
+                        explore_path(caves, &mut new_path, possible_paths);
                     }
                 } else {
-                    explore_path(caves, &mut new_path, possible_paths)
+                    explore_path(caves, &mut new_path, possible_paths);
                 }
             }
         }
     }
+}
+
+fn has_visited_this_small_cave_before(cave: &&str, current_path: &Vec<&str>) -> bool {
+    current_path.contains(cave)
+}
+
+fn two_small_caves_have_been_visited(current_path: &Vec<&str>) -> bool {
+    // start at 1 to skip "start"
+    for i in 1..current_path.len() {
+        if current_path[i].to_lowercase() != current_path[i] {
+            continue;
+        }
+        
+        for j in (i + 1)..current_path.len() {
+            if current_path[i] == current_path[j] {
+                return true
+            }
+        }
+    }
+
+    return false
 }
