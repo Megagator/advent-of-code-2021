@@ -9,9 +9,9 @@
             "request": "launch",
             "name": "Debug",
             "preLaunchTask": "cargo_build",
-            "program": "${workspaceFolder}/13-transparent-origami/target/debug/transparent-origami",
+            "program": "${workspaceFolder}/14-extended-polymerization/target/debug/extended-polymerization",
             "args": [],
-            "cwd": "${workspaceFolder}/13-transparent-origami"
+            "cwd": "${workspaceFolder}/14-extended-polymerization"
         }
     ]
 }

@@ -32,7 +32,7 @@ fn main() {
                                     .split(" -> ")
                                     .collect();
 
-            pairs.insert(pair[0].to_owned(), pair[1].to_owned());
+            pairs.insert(pair[0].to_owned(), pair[1].chars().next().unwrap());
         }
         pairs
     };
@@ -40,45 +40,71 @@ fn main() {
     // println!("1. {}", poly_template);
     // println!("{:?}", pairs);
 
-    let mut input: Vec<char> = poly_template.chars().collect();
-    for step in 1..=10 {
-        let mut output = vec![];
+    // create initial pairs and letter counts
+    let mut output_pair_counts: HashMap<String, u64> = HashMap::new();
+    let mut letter_counts: HashMap<char, u64> = HashMap::new();
 
-        for i in 0..input.len() - 1 {
+    let input: Vec<char> = poly_template.chars().collect();
+    for i in 0..input.len() {
+        let letter_counter = letter_counts.entry(input[i]).or_insert(0);
+        *letter_counter += 1;
+
+        if i < input.len() - 1 {
             let lookup_pair = format!("{}{}", input[i], input[i+1]);
-            match pairs.get(&lookup_pair) {
+            let pair_counter = output_pair_counts.entry(lookup_pair).or_insert(0);
+            *pair_counter += 1;
+        }
+    }
+
+    println!("Step: 0");
+    println!("pairs  : {:?}", output_pair_counts);
+    println!("letters: {:?}", letter_counts);
+
+    for step in 1..=40 {
+        let mut new_pair_counts: HashMap<String, u64> = HashMap::new();
+
+        for (pair, count) in output_pair_counts.iter_mut() {
+            match pairs.get(pair) {
                 Some(c) => {
-                    output.pop();
-                    output.push(input[i]);
-                    output.push(c.chars().last().unwrap());
-                    output.push(input[i+1]);
+                    // add two new pairs
+                    let new_pair_a = format!("{}{}", pair.chars().next().unwrap(), c);
+                    let new_pair_b = format!("{}{}", c, pair.chars().last().unwrap());
+                    
+                    let pair_counter = new_pair_counts.entry(new_pair_a).or_insert(0);
+                    *pair_counter += *count;
+                    let pair_counter = new_pair_counts.entry(new_pair_b).or_insert(0);
+                    *pair_counter += *count;
+                    
+                    // update new character's count
+                    let letter_counter = letter_counts.entry(*c).or_insert(0);
+                    *letter_counter += *count;
+
+                    // drop old pair
+                    *count = 0;
                 }
                 None => ()
             }
         }
 
-        // let result: String = output.iter().collect();
-        // println!("{}. {}", step, result);
+        // update pair counts
+        for (pair, count) in new_pair_counts {
+            let pair_counter = output_pair_counts.entry(pair).or_insert(0);
+            *pair_counter += count;
+        }
 
-        input = output;
-        println!("{}. size is {}", step, input.len());
+        println!();
+        println!("Step: {}", step);
+        println!("pairs  : {:?}", output_pair_counts);
+        println!("letters: {:?}", letter_counts);
     }
 
-
-    // after 10 evolutions, count characters:
-    let mut char_counter = HashMap::new();
-    for ch in input {
-        let counter = char_counter.entry(ch).or_insert(0);
-        *counter += 1;
-    }
-    // println!("{:?}", char_counter);
-
-    let mut lo = u32::MAX;
+    let mut lo = u64::MAX;
     let mut hi = 0;
-    for (_,n) in char_counter {
+    for (_,n) in letter_counts {
         lo = std::cmp::min(lo, n);
         hi = std::cmp::max(hi, n);
     }
 
+    println!();
     println!("Most common minus the least common is {}", hi - lo);
 }
